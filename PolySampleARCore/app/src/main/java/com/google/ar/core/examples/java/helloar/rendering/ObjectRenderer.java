@@ -30,10 +30,12 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
-import de.javagl.Obj;
-import de.javagl.ObjData;
-import de.javagl.ObjReader;
-import de.javagl.ObjUtils;
+
+import de.javagl.obj.Obj;
+import de.javagl.obj.ObjData;
+import de.javagl.obj.ObjReader;
+import de.javagl.obj.ObjUtils;
+
 
 /**
  * Renders an object loaded from an OBJ file in OpenGL.
@@ -112,7 +114,7 @@ public class ObjectRenderer {
      * @param textureBytes  A byte array representing a PNG file with the object's texture.
      */
     public void createOnGlThread(Context context, byte[] objBytes,
-            byte[] textureBytes) throws IOException {
+                                 byte[] textureBytes) throws IOException {
         // Read the texture.
         Bitmap textureBitmap = BitmapFactory.decodeByteArray(textureBytes, 0, textureBytes.length);
 
@@ -121,9 +123,9 @@ public class ObjectRenderer {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextures[0]);
 
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
-            GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
+                GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,
-            GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+                GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0);
         GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
@@ -155,7 +157,7 @@ public class ObjectRenderer {
 
         // Convert int indices to shorts for GL ES 2.0 compatibility
         ShortBuffer indices = ByteBuffer.allocateDirect(2 * wideIndices.limit())
-            .order(ByteOrder.nativeOrder()).asShortBuffer();
+                .order(ByteOrder.nativeOrder()).asShortBuffer();
         while (wideIndices.hasRemaining()) {
             indices.put((short) wideIndices.get());
         }
@@ -175,18 +177,18 @@ public class ObjectRenderer {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferId);
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, totalBytes, null, GLES20.GL_STATIC_DRAW);
         GLES20.glBufferSubData(
-            GLES20.GL_ARRAY_BUFFER, mVerticesBaseAddress, 4 * vertices.limit(), vertices);
+                GLES20.GL_ARRAY_BUFFER, mVerticesBaseAddress, 4 * vertices.limit(), vertices);
         GLES20.glBufferSubData(
-            GLES20.GL_ARRAY_BUFFER, mTexCoordsBaseAddress, 4 * texCoords.limit(), texCoords);
+                GLES20.GL_ARRAY_BUFFER, mTexCoordsBaseAddress, 4 * texCoords.limit(), texCoords);
         GLES20.glBufferSubData(
-            GLES20.GL_ARRAY_BUFFER, mNormalsBaseAddress, 4 * normals.limit(), normals);
+                GLES20.GL_ARRAY_BUFFER, mNormalsBaseAddress, 4 * normals.limit(), normals);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
         // Load index buffer
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndexBufferId);
         mIndexCount = indices.limit();
         GLES20.glBufferData(
-            GLES20.GL_ELEMENT_ARRAY_BUFFER, 2 * mIndexCount, indices, GLES20.GL_STATIC_DRAW);
+                GLES20.GL_ELEMENT_ARRAY_BUFFER, 2 * mIndexCount, indices, GLES20.GL_STATIC_DRAW);
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
         ShaderUtil.checkGLError(TAG, "OBJ buffer load");
@@ -206,7 +208,7 @@ public class ObjectRenderer {
 
         mModelViewUniform = GLES20.glGetUniformLocation(mProgram, "u_ModelView");
         mModelViewProjectionUniform =
-            GLES20.glGetUniformLocation(mProgram, "u_ModelViewProjection");
+                GLES20.glGetUniformLocation(mProgram, "u_ModelViewProjection");
 
         mPositionAttribute = GLES20.glGetAttribLocation(mProgram, "a_Position");
         mNormalAttribute = GLES20.glGetAttribLocation(mProgram, "a_Normal");
@@ -291,11 +293,11 @@ public class ObjectRenderer {
         Matrix.multiplyMV(mViewLightDirection, 0, mModelViewMatrix, 0, LIGHT_DIRECTION, 0);
         normalizeVec3(mViewLightDirection);
         GLES20.glUniform4f(mLightingParametersUniform,
-            mViewLightDirection[0], mViewLightDirection[1], mViewLightDirection[2], lightIntensity);
+                mViewLightDirection[0], mViewLightDirection[1], mViewLightDirection[2], lightIntensity);
 
         // Set the object material properties.
         GLES20.glUniform4f(mMaterialParametersUniform, mAmbient, mDiffuse, mSpecular,
-            mSpecularPower);
+                mSpecularPower);
 
         // Attach the object texture.
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -306,19 +308,19 @@ public class ObjectRenderer {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertexBufferId);
 
         GLES20.glVertexAttribPointer(
-            mPositionAttribute, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, mVerticesBaseAddress);
+                mPositionAttribute, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, mVerticesBaseAddress);
         GLES20.glVertexAttribPointer(
-            mNormalAttribute, 3, GLES20.GL_FLOAT, false, 0, mNormalsBaseAddress);
+                mNormalAttribute, 3, GLES20.GL_FLOAT, false, 0, mNormalsBaseAddress);
         GLES20.glVertexAttribPointer(
-            mTexCoordAttribute, 2, GLES20.GL_FLOAT, false, 0, mTexCoordsBaseAddress);
+                mTexCoordAttribute, 2, GLES20.GL_FLOAT, false, 0, mTexCoordsBaseAddress);
 
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
         // Set the ModelViewProjection matrix in the shader.
         GLES20.glUniformMatrix4fv(
-            mModelViewUniform, 1, false, mModelViewMatrix, 0);
+                mModelViewUniform, 1, false, mModelViewMatrix, 0);
         GLES20.glUniformMatrix4fv(
-            mModelViewProjectionUniform, 1, false, mModelViewProjectionMatrix, 0);
+                mModelViewProjectionUniform, 1, false, mModelViewProjectionMatrix, 0);
 
         // Enable vertex arrays
         GLES20.glEnableVertexAttribArray(mPositionAttribute);
